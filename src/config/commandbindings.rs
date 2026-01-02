@@ -56,6 +56,7 @@ impl CommandBindings {
                 r#type: ChannelDisplayPageType::Playlists,
                 ..
             }) => get_command(key, &self.channel_playlists),
+            Page::Login(_) => None,
         };
 
         if let Some(command) = command {

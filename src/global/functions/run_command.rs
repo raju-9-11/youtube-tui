@@ -32,7 +32,7 @@ pub fn text_command(command: &str) -> Option<String> {
         ["loadpage", page, ..] => {
             // Validate loadpage commands from command line to prevent hanging in raw screen
             match *page {
-                "popular" | "trending" | "watchhistory" | "feed" | "library" => {
+                "popular" | "trending" | "watchhistory" | "feed" | "library" | "login" => {
                     if command_parts.len() != 2 {
                         return Some(format!("Usage: `loadpage {}`", page));
                     }
@@ -65,7 +65,7 @@ pub fn text_command(command: &str) -> Option<String> {
                     if remapped_parts.len() >= 2 {
                         let page = remapped_parts[1];
                         match page {
-                            "popular" | "trending" | "watchhistory" | "feed" | "library" => {
+                            "popular" | "trending" | "watchhistory" | "feed" | "library" | "login" => {
                                 if command_parts.len() != 1 {
                                     return Some(format!("Usage: `{}`", command_parts[0]));
                                 }
@@ -199,6 +199,7 @@ pub fn run_single_command(
                 "watchhistory" => Some(Page::MainMenu(MainMenuPage::History)),
                 "feed" => Some(Page::Feed),
                 "library" => Some(Page::MainMenu(MainMenuPage::Library)),
+                "login" => Some(Page::Login(Default::default())),
                 "channel" => {
                     if command.len() != 3 {
                         *framework.data.global.get_mut::<Message>().unwrap() =
@@ -707,6 +708,7 @@ fn help_msg(cmdefines: &CommandsRemapConfig) -> String {
     \x1b[33mloadpage bookmarks\x1b[0m              Loads the bookmarks page
     \x1b[33mloadpage library\x1b[0m                Loads the library (saved items) page
     \x1b[33mloadpage feed\x1b[0m                   Loads the library (feed) page
+    \x1b[33mloadpage login\x1b[0m                  Loads the login page
     \x1b[33mloadpage search [query]\x1b[0m         Loads the search page with the given query
     \x1b[33mloadpage video [identifier]\x1b[0m     Loads the video item page
     \x1b[33mloadpage playlist [identifier]\x1b[0m  Loads the playlist item page

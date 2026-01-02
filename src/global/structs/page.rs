@@ -14,6 +14,7 @@ pub enum Page {
     Search(Search),
     SingleItem(SingleItemPage),
     ChannelDisplay(ChannelDisplayPage),
+    Login(LoginPage),
 }
 
 impl Debug for Page {
@@ -26,6 +27,7 @@ impl Debug for Page {
                 Self::Search(_) => "Search",
                 Self::SingleItem(_) => "SingleItem",
                 Self::ChannelDisplay(_) => "ChannelDisplay",
+                Self::Login(_) => "Login",
             }
         ))
     }
@@ -82,6 +84,14 @@ pub enum SingleItemPage {
     Playlist(String),
 }
 
+#[derive(Clone, PartialEq, Eq, Default)]
+pub struct LoginPage {
+    pub user_code: String,
+    pub verification_url: String,
+    pub loading: bool,
+    pub error: Option<String>,
+}
+
 impl Page {
     pub fn to_page_config(&self, framework: &Framework) -> PageConfig {
         let pages_config = framework.data.global.get::<PagesConfig>().unwrap();
@@ -91,6 +101,7 @@ impl Page {
             Self::Search(_) => pages_config.search.clone(),
             Self::SingleItem(_) => pages_config.singleitem.clone(),
             Self::ChannelDisplay(_) => pages_config.channeldisplay.clone(),
+            Self::Login(_) => pages_config.login.clone(),
         }
     }
 
@@ -103,6 +114,7 @@ impl Page {
             Self::Search(_) => pages_config.search.message.clone(),
             Self::SingleItem(_) => pages_config.singleitem.message.clone(),
             Self::ChannelDisplay(_) => pages_config.channeldisplay.message.clone(),
+            Self::Login(_) => String::from("Connecting to Google..."),
         }
     }
 }

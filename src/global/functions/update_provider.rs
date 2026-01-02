@@ -184,6 +184,7 @@ pub fn update_provider(data: &mut FrameworkData) {
                 },
             ),
         ],
+        Page::Login(_) => vec![],
     };
 
     data.global.get_mut::<Status>().unwrap().provider_updated = true;

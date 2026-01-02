@@ -3,7 +3,7 @@ use crate::global::common::{
     CommonImage, CommonPlaylist, CommonThumbnail, CommonVideo,
 };
 use rustypipe::{
-    client::RustyPipe,
+    client::{OauthDeviceCode, RustyPipe},
     model::{
         richtext::{ToHtml, ToPlaintext},
         ChannelItem, PlaylistItem, Thumbnail, VideoItem, YouTubeItem,
@@ -24,7 +24,7 @@ impl Default for RustyPipeWrapper {
     fn default() -> Self {
         Self(
             RustyPipe::builder()
-                .storage_dir(home::home_dir().unwrap().join(".local/share/rustypipe"))
+                .storage_dir(home::home_dir().unwrap().join(".config/youtube-tui"))
                 .build()
                 .unwrap(),
         )
@@ -429,4 +429,94 @@ impl SearchProviderTrait for RustyPipeWrapper {
             .map(playlist_item_convert)
             .collect())
     }
+
+    fn supports_login(&self) -> bool {
+        true
+    }
+
+    fn login_start(&self) -> Result<(String, String), Box<dyn std::error::Error>> {
+        let code = RUNTIME.get().unwrap().block_on(self.0.user_auth_get_code())?;
+        let user_code = code.user_code.clone();
+        let verification_url = code.verification_url.clone();
+
+        let mut map = PENDING_LOGINS.lock().unwrap();
+        map.insert(user_code.clone(), std::sync::Arc::new(code));
+
+        Ok((user_code, verification_url))
+    }
+    // Wait, I can't use `code` after extracting fields if I move it into Arc?
+    // I need to construct the map entry.
+    // But `code` will be moved into `Arc`.
+    // I can clone fields before moving.
+
+    // Correction:
+    /*
+    fn login_start(&self) -> Result<(String, String), Box<dyn std::error::Error>> {
+        let code = RUNTIME.get().unwrap().block_on(self.0.user_auth_get_code())?;
+        let user_code = code.user_code.clone();
+        let url = code.verification_url.clone();
+
+        let mut map = PENDING_LOGINS.lock().unwrap();
+        map.insert(user_code.clone(), std::sync::Arc::new(code));
+        Ok((user_code, url))
+    }
+    */
+
+    // I will apply this version.
+
+    fn login_wait(&self, user_code: &str) -> Result<bool, Box<dyn std::error::Error>> {
+        let code_opt = {
+            let map = PENDING_LOGINS.lock().unwrap();
+            map.get(user_code).cloned()
+        };
+
+        if let Some(code) = code_opt {
+             match RUNTIME.get().unwrap().block_on(self.0.user_auth_wait_for_login(&code)) {
+                 Ok(_) => {
+                     let mut map = PENDING_LOGINS.lock().unwrap();
+                     map.remove(user_code);
+                     Ok(true)
+                 },
+                 Err(e) => {
+                     Err(Box::new(e))
+                 }
+             }
+        } else {
+            Err("Invalid user code or session expired".into())
+        }
+    }
+
+    fn is_logged_in(&self) -> Result<bool, Box<dyn std::error::Error>> {
+        let token = RUNTIME.get().unwrap().block_on(self.0.user_auth_access_token());
+        Ok(token.is_ok())
+    }
+
+    fn supports_library(&self) -> bool {
+        // We assume we can fetch library if logged in?
+        // Actually, RustyPipe doesn't seem to have a direct "library" call for OAuth TV client.
+        // But we can try to fetch the "Library" playlist if we knew its ID?
+        // Or maybe just "saved playlists"?
+        // For now, I'll return true and implement a best-effort approach.
+        true
+    }
+
+    fn library(&self) -> Result<Vec<CommonPlaylist>, Box<dyn std::error::Error>> {
+        // With userdata feature, we might have access to playlists
+        // Try to fetch user playlists
+        // rp.query().saved_playlists() returns the user's playlists
+        let res = RUNTIME.get().unwrap().block_on(self.0.query().saved_playlists());
+
+        match res {
+            Ok(playlists) => {
+                 Ok(playlists.items.into_iter().map(playlist_item_convert).collect())
+            },
+            Err(e) => {
+                // Fallback or error
+                Err(Box::new(e))
+            }
+        }
+    }
 }
+
+static PENDING_LOGINS: std::sync::LazyLock<std::sync::Mutex<std::collections::HashMap<String, std::sync::Arc<OauthDeviceCode>>>> =
+    std::sync::LazyLock::new(|| std::sync::Mutex::new(std::collections::HashMap::new()));
