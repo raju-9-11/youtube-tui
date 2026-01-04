@@ -61,6 +61,7 @@ pub enum MainMenuPage {
     Popular,
     History,
     Library,
+    Playlists,
 }
 
 /// variants of the coannel display page

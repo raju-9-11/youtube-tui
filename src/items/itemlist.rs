@@ -404,20 +404,21 @@ impl FrameworkItem for ItemList {
             Page::MainMenu(MainMenuPage::Library) => {
                 let history = framework.data.global.get::<Library>().unwrap();
                 self.items = history.0.clone().into_iter().rev().collect();
-
-                // Add remote playlists if logged in
+            }
+            Page::MainMenu(MainMenuPage::Playlists) => {
                 if SearchProviderWrapper::is_logged_in().unwrap_or(false) {
                      if let Ok(playlists) = SearchProviderWrapper::library() {
-                         // Convert CommonPlaylist to Item
-                         let remote_items: Vec<Item> = playlists.into_iter().map(|p| Item::from_common_playlist(p)).collect();
-                         // Insert separator? Or just append.
-                         // Let's just append for now.
-                         if !remote_items.is_empty() {
-                            // Maybe add a header? Item::Page is a page turner, not a header.
-                            // We can use a trick or just append.
-                            self.items.extend(remote_items);
-                         }
+                         self.items = playlists.into_iter().map(|p| Item::from_common_playlist(p)).collect();
+                     } else {
+                         // Failed to fetch
+                         // Display error or empty
+                         self.items = Vec::new();
                      }
+                } else {
+                    // Not logged in
+                    // We can't display a text here easily as ItemList expects Items.
+                    // But we can return empty. The MessageBar usually displays status.
+                    self.items = Vec::new();
                 }
             }
             Page::MainMenu(MainMenuPage::History) => {

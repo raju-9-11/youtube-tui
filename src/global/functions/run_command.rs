@@ -32,7 +32,7 @@ pub fn text_command(command: &str) -> Option<String> {
         ["loadpage", page, ..] => {
             // Validate loadpage commands from command line to prevent hanging in raw screen
             match *page {
-                "popular" | "trending" | "watchhistory" | "feed" | "library" | "login" => {
+                "popular" | "trending" | "watchhistory" | "feed" | "library" | "login" | "playlists" => {
                     if command_parts.len() != 2 {
                         return Some(format!("Usage: `loadpage {}`", page));
                     }
@@ -65,7 +65,7 @@ pub fn text_command(command: &str) -> Option<String> {
                     if remapped_parts.len() >= 2 {
                         let page = remapped_parts[1];
                         match page {
-                            "popular" | "trending" | "watchhistory" | "feed" | "library" | "login" => {
+                            "popular" | "trending" | "watchhistory" | "feed" | "library" | "login" | "playlists" => {
                                 if command_parts.len() != 1 {
                                     return Some(format!("Usage: `{}`", command_parts[0]));
                                 }
@@ -199,6 +199,7 @@ pub fn run_single_command(
                 "watchhistory" => Some(Page::MainMenu(MainMenuPage::History)),
                 "feed" => Some(Page::Feed),
                 "library" => Some(Page::MainMenu(MainMenuPage::Library)),
+                "playlists" => Some(Page::MainMenu(MainMenuPage::Playlists)),
                 "login" => Some(Page::Login(Default::default())),
                 "channel" => {
                     if command.len() != 3 {

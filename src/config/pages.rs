@@ -195,6 +195,8 @@ pub enum PageItems {
     Login,
     /// Login button
     LoginButton,
+    /// Playlists button
+    Playlists,
 }
 
 impl PageItems {
@@ -219,6 +221,7 @@ impl PageItems {
             Self::ChannelPlaylists => Box::new(PageButton::ChannelPlaylists),
             Self::Login => Box::<LoginItem>::default(),
             Self::LoginButton => Box::new(PageButton::Login),
+            Self::Playlists => Box::new(PageButton::Playlists),
         }
     }
 
@@ -232,6 +235,7 @@ impl PageItems {
             | Self::ChannelMain
             | Self::ChannelVideos
             | Self::ChannelPlaylists
+            | Self::Playlists
             | Self::LoginButton => Constraint::Length(15),
             Self::SearchBar => Constraint::Min(16),
             Self::MessageBar => Constraint::Min(3),
@@ -258,6 +262,7 @@ impl PageItems {
             | Self::MessageBar
             | Self::SearchBar
             | Self::SearchFilters
+            | Self::Playlists
             | Self::LoginButton => Constraint::Length(3),
             Self::ItemList
             | Self::SingleItemInfo
@@ -298,7 +303,11 @@ fn main_menu_default() -> PageConfig {
         layout: vec![
             PageRow::from_vec(vec![PageItems::SearchBar, PageItems::SearchFilters], false),
             PageRow::from_vec(
-                vec![PageItems::Library, PageItems::Feed, PageItems::History, PageItems::LoginButton],
+                vec![PageItems::Library, PageItems::Feed, PageItems::Playlists, PageItems::History],
+                true,
+            ),
+            PageRow::from_vec(
+                vec![PageItems::LoginButton],
                 true,
             ),
             PageRow::from_vec(vec![PageItems::ItemList], false),
