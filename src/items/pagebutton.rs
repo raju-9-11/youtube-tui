@@ -19,6 +19,8 @@ pub enum PageButton {
     History,
     Feed,
     Library,
+    Playlists,
+    Login,
 }
 
 impl PageButton {
@@ -41,6 +43,8 @@ impl PageButton {
             Self::History => Page::MainMenu(MainMenuPage::History),
             Self::Feed => Page::Feed,
             Self::Library => Page::MainMenu(MainMenuPage::Library),
+            Self::Playlists => Page::MainMenu(MainMenuPage::Playlists),
+            Self::Login => Page::Login(Default::default()),
         }
     }
 
@@ -66,6 +70,8 @@ impl Display for PageButton {
             Self::History => "History",
             Self::Feed => "Feed",
             Self::Library => "Library",
+            Self::Playlists => "Playlists",
+            Self::Login => "Login",
         })
     }
 }

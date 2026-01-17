@@ -37,6 +37,17 @@ pub fn update_provider(data: &mut FrameworkData) {
                 }
             },
         )],
+        Page::MainMenu(MainMenuPage::Playlists) => vec![(
+            String::from("url"),
+            match status.provider {
+                Provider::YouTube => String::from("https://www.youtube.com/feed/playlists"),
+                Provider::Invidious => {
+                    // Invidious might not have a direct playlists feed URL map easily,
+                    // but we can map it to something reasonable.
+                    format!("{}/feed/playlists", mainconfig.invidious_instance)
+                }
+            },
+        )],
         Page::MainMenu(MainMenuPage::Popular) => vec![(
             String::from("url"),
             match status.provider {
@@ -184,6 +195,7 @@ pub fn update_provider(data: &mut FrameworkData) {
                 },
             ),
         ],
+        Page::Login(_) => vec![],
     };
 
     data.global.get_mut::<Status>().unwrap().provider_updated = true;

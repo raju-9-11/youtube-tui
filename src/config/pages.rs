@@ -36,6 +36,8 @@ pub struct PagesConfig {
     pub singleitem: PageConfig,
     #[serde(default = "channeldisplay_default")]
     pub channeldisplay: PageConfig,
+    #[serde(default = "login_default")]
+    pub login: PageConfig,
 }
 
 impl Key for PagesConfig {
@@ -54,6 +56,7 @@ impl Default for PagesConfig {
             search: search_default(),
             singleitem: singleitem_default(),
             channeldisplay: channeldisplay_default(),
+            login: login_default(),
         }
     }
 }
@@ -188,6 +191,12 @@ pub enum PageItems {
     ChannelVideos,
     /// button which loads the channel playlists page
     ChannelPlaylists,
+    /// Login page
+    Login,
+    /// Login button
+    LoginButton,
+    /// Playlists button
+    Playlists,
 }
 
 impl PageItems {
@@ -210,6 +219,9 @@ impl PageItems {
             Self::ChannelMain => Box::new(PageButton::ChannelMain),
             Self::ChannelVideos => Box::new(PageButton::ChannelVideos),
             Self::ChannelPlaylists => Box::new(PageButton::ChannelPlaylists),
+            Self::Login => Box::<LoginItem>::default(),
+            Self::LoginButton => Box::new(PageButton::Login),
+            Self::Playlists => Box::new(PageButton::Playlists),
         }
     }
 
@@ -222,7 +234,9 @@ impl PageItems {
             | Self::Library
             | Self::ChannelMain
             | Self::ChannelVideos
-            | Self::ChannelPlaylists => Constraint::Length(15),
+            | Self::ChannelPlaylists
+            | Self::Playlists
+            | Self::LoginButton => Constraint::Length(15),
             Self::SearchBar => Constraint::Min(16),
             Self::MessageBar => Constraint::Min(3),
             Self::ItemList
@@ -230,6 +244,7 @@ impl PageItems {
             | Self::ChannelDisplay
             | Self::ChannelList
             | Self::VideoList => Constraint::Min(9),
+            Self::Login => Constraint::Min(20),
             Self::SearchFilters => Constraint::Length(5),
         }
     }
@@ -246,10 +261,14 @@ impl PageItems {
             | Self::Trending
             | Self::MessageBar
             | Self::SearchBar
-            | Self::SearchFilters => Constraint::Length(3),
-            Self::ItemList | Self::SingleItemInfo | Self::ChannelDisplay | Self::VideoList => {
-                Constraint::Min(6)
-            }
+            | Self::SearchFilters
+            | Self::Playlists
+            | Self::LoginButton => Constraint::Length(3),
+            Self::ItemList
+            | Self::SingleItemInfo
+            | Self::ChannelDisplay
+            | Self::VideoList
+            | Self::Login => Constraint::Min(6),
             Self::ChannelList => Constraint::Length(18),
         }
     }
@@ -284,7 +303,11 @@ fn main_menu_default() -> PageConfig {
         layout: vec![
             PageRow::from_vec(vec![PageItems::SearchBar, PageItems::SearchFilters], false),
             PageRow::from_vec(
-                vec![PageItems::Library, PageItems::Feed, PageItems::History],
+                vec![PageItems::Library, PageItems::Feed, PageItems::Playlists, PageItems::History],
+                true,
+            ),
+            PageRow::from_vec(
+                vec![PageItems::LoginButton],
                 true,
             ),
             PageRow::from_vec(vec![PageItems::ItemList], false),
@@ -292,6 +315,17 @@ fn main_menu_default() -> PageConfig {
         ],
         message: String::from("Loading main menu..."),
         command: String::from("key Esc 0 ;; key Down 0 ;; key Down 0 ;; key Enter 0"),
+    }
+}
+
+fn login_default() -> PageConfig {
+    PageConfig {
+        layout: vec![
+            PageRow::from_vec(vec![PageItems::Login], true),
+            PageRow::from_vec(vec![PageItems::MessageBar], false),
+        ],
+        message: String::from("Initiating login..."),
+        command: String::from(""),
     }
 }
 

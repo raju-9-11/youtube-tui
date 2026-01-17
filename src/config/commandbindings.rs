@@ -21,6 +21,7 @@ pub struct CommandBindings {
     pub watchhistory: HashMap<KeyCode, HashMap<u8, String>>,
     pub feed: HashMap<KeyCode, HashMap<u8, String>>,
     pub libray: HashMap<KeyCode, HashMap<u8, String>>,
+    pub playlists: HashMap<KeyCode, HashMap<u8, String>>,
 }
 
 impl Key for CommandBindings {
@@ -41,6 +42,7 @@ impl CommandBindings {
             Page::MainMenu(MainMenuPage::Popular) => get_command(key, &self.popular),
             Page::MainMenu(MainMenuPage::History) => get_command(key, &self.watchhistory),
             Page::MainMenu(MainMenuPage::Library) => get_command(key, &self.libray),
+            Page::MainMenu(MainMenuPage::Playlists) => get_command(key, &self.playlists),
             Page::Feed => get_command(key, &self.feed),
             Page::SingleItem(SingleItemPage::Video(_)) => get_command(key, &self.video),
             Page::SingleItem(SingleItemPage::Playlist(_)) => get_command(key, &self.playlist),
@@ -56,6 +58,7 @@ impl CommandBindings {
                 r#type: ChannelDisplayPageType::Playlists,
                 ..
             }) => get_command(key, &self.channel_playlists),
+            Page::Login(_) => None,
         };
 
         if let Some(command) = command {
@@ -95,6 +98,8 @@ pub struct CommandBindingsSerde {
     pub feed: HashMap<KeyCodeSerde, HashMap<u8, String>>,
     #[serde(default = "library_default")]
     pub library: HashMap<KeyCodeSerde, HashMap<u8, String>>,
+    #[serde(default = "playlist_default")] // Reuse playlist bindings for playlists page for now
+    pub playlists: HashMap<KeyCodeSerde, HashMap<u8, String>>,
 }
 
 impl ConfigTrait for CommandBindingsSerde {
@@ -116,6 +121,7 @@ impl CommandBindingsSerde {
             watchhistory: de_serde(self.watchhistory)?,
             feed: de_serde(self.feed)?,
             libray: de_serde(self.library)?,
+            playlists: de_serde(self.playlists)?,
         })
     }
 }
@@ -135,6 +141,7 @@ impl Default for CommandBindingsSerde {
             watchhistory: watchhistory_default(),
             feed: feed_default(),
             library: library_default(),
+            playlists: playlist_default(),
         }
     }
 }

@@ -77,6 +77,27 @@ pub trait SearchProviderTrait: DynClone + Send {
         unimplemented!("playlist not implemented")
     }
 
+    fn supports_login(&self) -> bool {
+        false
+    }
+    // returns (device_code, verification_url)
+    fn login_start(&self) -> Result<(String, String), Box<dyn Error>> {
+        unimplemented!("login_start not implemented")
+    }
+    // returns true if logged in
+    fn login_wait(&self, code: &str) -> Result<bool, Box<dyn Error>> {
+        unimplemented!("login_wait not implemented")
+    }
+    fn is_logged_in(&self) -> Result<bool, Box<dyn Error>> {
+        unimplemented!("is_logged_in not implemented")
+    }
+    fn supports_library(&self) -> bool {
+        false
+    }
+    fn library(&self) -> Result<Vec<CommonPlaylist>, Box<dyn Error>> {
+        unimplemented!("library not implemented")
+    }
+
     /*
     fn supports_album(&self) -> bool {
         false
@@ -199,5 +220,37 @@ impl SearchProviderWrapper {
             return Err(UnsupportedError("playlist").into());
         }
         provider.playlist(id)
+    }
+
+    pub fn login_start() -> Result<(String, String), Box<dyn Error>> {
+        let provider = Self::get();
+        if !provider.supports_login() {
+            return Err(UnsupportedError("login").into());
+        }
+        provider.login_start()
+    }
+
+    pub fn login_wait(code: &str) -> Result<bool, Box<dyn Error>> {
+        let provider = Self::get();
+        if !provider.supports_login() {
+            return Err(UnsupportedError("login").into());
+        }
+        provider.login_wait(code)
+    }
+
+    pub fn is_logged_in() -> Result<bool, Box<dyn Error>> {
+        let provider = Self::get();
+        if !provider.supports_login() {
+            return Ok(false);
+        }
+        provider.is_logged_in()
+    }
+
+    pub fn library() -> Result<Vec<CommonPlaylist>, Box<dyn Error>> {
+        let provider = Self::get();
+        if !provider.supports_library() {
+            return Err(UnsupportedError("library").into());
+        }
+        provider.library()
     }
 }

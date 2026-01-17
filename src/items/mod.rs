@@ -19,3 +19,5 @@ mod channellist;
 pub use channellist::*;
 mod videolist;
 pub use videolist::*;
+mod loginpage;
+pub use loginpage::*;

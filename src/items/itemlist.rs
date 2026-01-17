@@ -405,6 +405,22 @@ impl FrameworkItem for ItemList {
                 let history = framework.data.global.get::<Library>().unwrap();
                 self.items = history.0.clone().into_iter().rev().collect();
             }
+            Page::MainMenu(MainMenuPage::Playlists) => {
+                if SearchProviderWrapper::is_logged_in().unwrap_or(false) {
+                     if let Ok(playlists) = SearchProviderWrapper::library() {
+                         self.items = playlists.into_iter().map(|p| Item::from_common_playlist(p)).collect();
+                     } else {
+                         // Failed to fetch
+                         // Display error or empty
+                         self.items = Vec::new();
+                     }
+                } else {
+                    // Not logged in
+                    // We can't display a text here easily as ItemList expects Items.
+                    // But we can return empty. The MessageBar usually displays status.
+                    self.items = Vec::new();
+                }
+            }
             Page::MainMenu(MainMenuPage::History) => {
                 // the vector needs to be reversed because the latest watch history is pushed to
                 // the back, meaning it needs to be reversed so that the latests one are on top

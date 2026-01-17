@@ -42,7 +42,7 @@ ratatui = {version = "0.29", default-features = false, features = ["serde"]}
 unicode-segmentation = "1"
 libmpv-sirno = { version = "2.0.2-fork.1", optional = true }
 
-rustypipe = "0.11"
+rustypipe = { version = "0.11", features = ["userdata"] }
 futures = { version = "0.3", features = [ "executor" ] }
 tokio = { version = "1", features = [ "rt" ]}
 http_req = "0.14.1"
